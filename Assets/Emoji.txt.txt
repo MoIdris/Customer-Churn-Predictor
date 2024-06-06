@@ -1,0 +1,5 @@
+Home Page: 🏠
+Data Page: 📊
+Dashboard Page: 📈
+Predict Page: 🔮
+History Page: 📜
