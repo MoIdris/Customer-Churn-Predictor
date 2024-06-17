@@ -2,3 +2,4 @@
 /lp4_venv
 /.ipynb.checkpoints
 /.streamlit
+/.streamlit/secrets.toml
