@@ -4,12 +4,15 @@ import plotly.express as px
 import pandas as pd
 import altair as alt
 
+
 # Page configurations
 st.set_page_config(
     page_title ='Dashboard Page',
     page_icon ='📈',
     layout="wide"
 )
+
+
 # set page theme
 alt.themes.enable("dark")
 color_map = {"Yes":"blue","No":"skyblue"}
@@ -52,7 +55,6 @@ def eda_dashboard():
     st.plotly_chart(boxplot)
 
 
-    
     st.write("#")
     st.markdown("#### Bivariate Analysis")
     col1,col2 = st.columns(2)
@@ -89,24 +91,41 @@ def eda_dashboard():
 
 def kpi_dashboard():
     st.markdown(" ### Key Performance Indicators")
+    
+# KPIs Section
+    met1, met2, met3, met4 = st.columns(4)
+
+# Compute key metrics from the DataFrame
+    avg_tenure = df['tenure'].mean()
+    avg_monthly_charges = df['monthlycharges'].mean()
+    churn_rate = df['churn'].value_counts(normalize=True).get('Yes', 0) * 100
+    contract_count = df['contract'].value_counts()
+
+# Display KPIs
+    met1.metric("Average Tenure", f"{avg_tenure:.2f} months", delta=-24)
+    met2.metric("Average Monthly Charges", f"${avg_monthly_charges:.2f}", delta=18.0)
+    met3.metric("Churn Rate",f"{churn_rate:.2f}%", delta=-11.0)
+    met4.metric("Total Customers", len(df), delta=len(df) - 1000)
+
+
     col1, col2, col3 = st.columns(3)
-    with col1: 
-        st.markdown(
-            f"""
-            <div style="background-color: blue; border-radius:10px; width:80%; margin-top: 20px">
-                <h3 style="margin-left:30px">Summary Statistics for the Dataset</h3>
-                <hr>
-                <h5 style="margin-left:30px">Churn Rate: {(df["churn"].value_counts(normalize=True).get("Yes", 0) * 100):.2f}%</h5>
-                <hr>
-                <h5 style="margin-left:30px"> Average Monthly Charges: $ {df["monthlycharges"].mean():.2f}</h5>
-                <hr>
-                <h5 style="margin-left:30px"> Average Yearly Charges: $ {df["totalcharges"].mean():.2f}</h5>
-                <hr>
-                <h5 style="margin-left:30px">Number of Customers: {df.size}</h5>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+    # with col1: 
+    #     st.markdown(
+    #         f"""
+    #         <div style="background-color: blue; border-radius:10px; width:80%; margin-top: 20px">
+    #             <h3 style="margin-left:30px">Summary Statistics for the Dataset</h3>
+    #             <hr>
+    #             <h5 style="margin-left:30px">Churn Rate: {(df["churn"].value_counts(normalize=True).get("Yes", 0) * 100):.2f}%</h5>
+    #             <hr>
+    #             <h5 style="margin-left:30px"> Average Monthly Charges: $ {df["monthlycharges"].mean():.2f}</h5>
+    #             <hr>
+    #             <h5 style="margin-left:30px"> Average Yearly Charges: $ {df["totalcharges"].mean():.2f}</h5>
+    #             <hr>
+    #             <h5 style="margin-left:30px">Number of Customers: {df.size}</h5>
+    #         </div>
+    #         """,
+    #         unsafe_allow_html=True
+    #     )
 
     with col2:
         violin_plot = px.violin(df,x="churn",y="monthlycharges",title="Impact of Monthly Charges On Customer Churn",color="churn",color_discrete_map=color_map)
@@ -136,6 +155,11 @@ def kpi_dashboard():
     with col9:
         tenure_versus_charges = px.density_contour(df,x="tenure",color="churn",color_discrete_map=color_map,marginal_x="histogram",marginal_y="histogram",title="Tenure by Churn Status")
         st.plotly_chart(tenure_versus_charges)
+
+# Sidebar
+    st.sidebar.title("Navigation")
+    dashboard_type = st.sidebar.radio("Choose Dashboard", ("EDA", "KPIs"), key='dashboard_type')
+
 
 if __name__ == "__main__":
     # set page title
