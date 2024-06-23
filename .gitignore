@@ -3,3 +3,5 @@
 /.ipynb.checkpoints
 /.streamlit
 /.streamlit/secrets.toml
+/__pycache
+/config.yaml

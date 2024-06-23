@@ -1,6 +1,11 @@
+import os
+import datetime
 import streamlit as st
 import pandas as pd
 import joblib
+import yaml
+from yaml.loader import SafeLoader
+import streamlit_authenticator as stauth
 
 st.set_page_config(
     page_title='Predict Customer Churn!',
@@ -11,22 +16,20 @@ st.set_page_config(
 st.title("Predict Customer Churn!")
 
 # Load models and encoder
-st.cache_resource
+@st.cache_resource
 def load_logistic_reg_pipeline():
-    pipeline = joblib.load('Models/Logistic_reg.joblib')
+    pipeline = joblib.load('Models/new/Logistic_reg.joblib')
     return pipeline
 
-
-st.cache_resource
+@st.cache_resource
 def load_adaboost_pipeline():
-    pipeline = joblib.load('Models/AdaBoost.joblib')
+    pipeline = joblib.load('Models/new/AdaBoost.joblib')
     return pipeline
-
 
 def select_model():
     col1, col2 = st.columns(2)
     with col1:
-        st.selectbox('Select a model', options=['Logistic_reg', 'AdaBoost'], key='selected_model')
+        st.selectbox('Select a model', options=['Logistic Regression', 'AdaBoost'], key='selected_model')
     with col2:
         pass
 
@@ -39,114 +42,119 @@ def select_model():
 
     return pipeline, encoder
 
-
-
-def make_prediction(pipeline, encoder):
-    customerID = st.session_state['customerID']      
-    gender = st.session_state['gender']
-    senior_citizen = st.session_state['senior_citizen']
-    partner = st.session_state['partner']
-    dependents = st.session_state['dependents']
-    tenure = st.session_state['tenure']
-    paperless_billing = st.session_state['paperless_billing']
-    payment_method = st.session_state['payment_method']
-    monthly_charges = st.session_state['monthly_charges']
-    total_charges = st.session_state['total_charges']
-    phone_service = st.session_state['phone_service']
-    multiple_lines = st.session_state['multiple_lines']
-    internet_service = st.session_state['internet_service']
-    online_security = st.session_state['online_security']
-    online_backup = st.session_state['online_backup']
-    device_protection = st.session_state['device_protection']
-    tech_support = st.session_state['tech_support']
-    streaming_tv = st.session_state['streaming_tv']
-    streaming_movies = st.session_state['streaming_movies']
-    contract = st.session_state['contract']
-    probability = st.session_state['probability']
-    prediction = st.session_state['prediction']
+# write a function to make prediction
+def make_prediction(pipeline,encoder):
+    gender = st.session_state["gender"]
+    senior_citizen = st.session_state["senior_citizen"]
+    partner = st.session_state["partner"]
+    tenure = st.session_state["tenure"]
+    monthly_charges = st.session_state["monthly_charges"]
+    total_charges = st.session_state["total_charges"]
+    payment_method = st.session_state["payment_method"]
+    contract = st.session_state["contract"]
+    paperless_billing = st.session_state["paperless_billing"]
+    dependents = st.session_state["dependents"]
+    phone_service = st.session_state["phone_service"]
+    multiple_lines = st.session_state["multiple_lines"]
+    streaming_tv = st.session_state["streaming_tv"]
+    streaming_movies = st.session_state["streaming_movies"]
+    online_security = st.session_state["online_security"]
+    online_backup = st.session_state["online_backup"]
+    device_protection = st.session_state["device_protection"]
+    tech_support = st.session_state["tech_support"]
+    internet_service = st.session_state["internet_service"]
     
-    data = {'customerid': [customerID], 'gender': [gender], 'seniorcitizen': [senior_citizen], 'partner': [partner], 'dependents': [dependents],
-       'tenure': [tenure], 'phoneservice': [phone_service], 'multiplelines': [multiple_lines], 'internetservice': [internet_service],
-       'onlinesecurity': [online_security], 'onlinebackup': [online_backup], 'deviceprotection': [device_protection], 'techsupport': [tech_support],
-       'streamingtv': [streaming_tv], 'streamingmovies': [streaming_movies], 'contract': [contract], 'paperlessbilling': [paperless_billing],
-       'paymentmethod': [payment_method], 'monthlycharges': [monthly_charges], 'totalcharges': [total_charges]}
-    
-    # Make a DataFrame
-    df = pd.DataFrame(data)
+    # create rows for the dataframe
+    data=[[gender,senior_citizen,partner,tenure,monthly_charges,total_charges,
+           payment_method,contract,paperless_billing,dependents,
+           phone_service,multiple_lines,streaming_tv,streaming_movies,
+           online_security,online_backup,device_protection,tech_support,
+           internet_service]]
+    # create columns for the dataframe
+    columns = ['gender','seniorcitizen','partner','tenure','monthlycharges', 'totalcharges'
+               ,'paymentmethod', 'contract','paperlessbilling','dependents','phoneservice', 
+               'multiplelines','streamingtv','streamingmovies','onlinesecurity', 
+               'onlinebackup', 'deviceprotection', 'techsupport','internetservice']
+    df = pd.DataFrame(data=data,columns=columns)
 
-    # Define Probability and Prediction
+    # Save dataframe to CSV as historics data
+    df.to_csv('./data/history.csv')
+
+    # make predictions
     pred = pipeline.predict(df)
     pred_int = int(pred[0])
-    prediction = encoder.inverse_transform([pred_int])
-    probability = pipeline.predict_proba(df)
-    st.session_state['prediction'] = pred_int
-    st.session_state['probability'] = probability
+
+    # transform the predicted variable 
+    prediction = encoder.inverse_transform([[pred_int]])[0]
+
+    # calculate prediction probability
+    probability = pipeline.predict_proba(df)[0][pred_int]
+
+    # Map probability to Yes or No
+    prediction_label = "Yes" if pred_int == 1 else "No"
     
-    return prediction, probability
 
-if 'prediction' not in st.session_state:
-    st.session_state['prediction']= None
-if 'probability' not in st.session_state:
-    st.session_state['probability']= None
+    # update the session state with the prediction and probability
+    st.session_state["prediction"] = prediction
+    st.session_state["prediction_label"] = prediction_label
+    st.session_state["probability"] = probability
+    
+    # update the dataframe to capture predictions for the history page
+    df["PredictionTime"] = datetime.date.today()
+    df["ModelUsed"] = st.session_state["selected_model"]
+    df["Prediction"] = st.session_state["prediction"]
+    df["PredictionProbability"] = st.session_state["probability"]
+    # export df as prediction_history.csv
+    df.to_csv('./data/prediction_history.csv',mode="a", header=not os.path.exists('./data/prediction_history.csv'),index=False)
+    return prediction,prediction_label,probability
 
+# create an initial instance of session state to hold prediction
+if "prediction" not in st.session_state:
+    st.session_state.prediction = None
 
-# Creating the form
-def display_form():
+if "probability" not in st.session_state:
+    st.session_state.probability = None
 
+# Creating a form
+def display_forms():
+    
     pipeline, encoder = select_model()
-
-    with st.form('input_features'):
-
-        col1, col2 = st.columns(2)
+    with st.form('input-features'):
+        col1,col2 = st.columns(2)
         with col1:
-            st.write('### Customer Demographics')
-            customerID = st.text_input('Customer ID', key = 'customerID')
-            gender = st.selectbox('Gender', options = ['Male', 'Female'], key = 'gender')
-            senior_citizen = st.selectbox('Senior Citizen', options = ['Yes', 'No'], key = 'senior_citizen')
-            partner = st.selectbox('Partner', options = ['Yes', 'No'], key = 'partner')
-            dependents = st.selectbox('dependents', options= ['Yes', 'No'], key = 'dependents')
-            tenure = st.number_input('Tenure (months)', min_value=0, max_value=100, step=1, key = 'tenure')
-            st.write('### Billing and Payment')
-            paperless_billing = st.selectbox('Paperless Billing', options = ['Yes', 'No'], key = 'paperless_billing')
-            payment_method = st.selectbox('Payment Method', options = ['Electronic check', 'Mailed check', 'Bank transfer (automatic)', 'Credit card (automatic)'], key = 'payment_method')
-            monthly_charges = st.number_input('Monthly Charges ($)', min_value=0.0, format="%.2f", key = 'monthly_charges')
-            total_charges = st.number_input('Total Charges ($)', min_value=0.0, format="%.2f", key = 'total_charges')
+            st.write("### Personal Info 🧑‍💼")
+            st.selectbox("Select your gender",options=["Male","Female"],key="gender")
+            st.selectbox('Senior Citizen', options = ['1', '0'], key = 'senior_citizen')
+            st.selectbox("Do you have a dependent ?",options=["Yes","No"],key="dependents")
+            st.selectbox("Do you have a partner?",options= ["Yes", "No",],key="partner")
+            st.number_input("Enter your tenure",min_value = 0, max_value = 72,step=1, key="tenure")
+            st.divider()
+            st.write("### Billing and Payment💵")
+            st.number_input("Enter your monthly charges",min_value=0.00, max_value = 200.00,step=0.10, key="monthly_charges")
+            st.number_input("Enter your total charges per year",min_value=0.00,max_value=100000.00, step=0.10,key="total_charges")
+            st.selectbox("Select your prefered contract type",options=["Month-to-month","One year","Two year"],key="contract")
+            st.selectbox("Select your payment method",options= ["Electronic check", "Mailed check","Bank transfer (automatic)",
+        "Credit card (automatic)"], key="payment_method")
         with col2:
-            st.write('### Services Subscribed')
-            phone_service = st.selectbox('Phone Service', options = ['Yes', 'No'], key = 'phone_service')
-            multiple_lines = st.selectbox('Multiple Lines', options = ['Yes', 'No'], key = 'multiple_lines')
-            internet_service = st.selectbox('Internet Service', options = ['DSL', 'Fiber optic', 'No'], key = 'internet_service')
-            online_security = st.selectbox('Online Security', options = ['Yes', 'No'], key = 'online_security')
-            online_backup = st.selectbox('Online Backup', options = ['Yes', 'No'], key = 'online_backup')
-            device_protection = st.selectbox('Device Protection', options = ['Yes', 'No'], key = 'device_protection')
-            tech_support = st.selectbox('Tech Support', options = ['Yes', 'No'], key = 'tech_support')
-            streaming_tv = st.selectbox('Streaming TV', options = ['Yes', 'No'],  key = 'streaming_tv')
-            streaming_movies = st.selectbox('Streaming Movies', options = ['Yes', 'No'], key = 'streaming_movies')
-            contract = st.selectbox('Contract', options = ['Month-to-month', 'One year', 'Two year'], key = 'contract')
-            
-        st.form_submit_button('Submit', on_click=make_prediction, kwargs = dict(pipeline = pipeline, encoder = encoder))
-
-
-
-# if __name__ == '__main__':
-
-
-#     display_form()
-#     final_prediction = st.session_state['prediction']
-
-#     if not final_prediction:
-#         st.write('### Predictions show here!')
-#         st.divider()
-#     else:
-#         st.write(f'###{final_prediction}')
-
-#     st.write(st.session_state)
-
+            st.write("### Service Info  🛎️")
+            st.selectbox("Do you have a phone service?",options=["Yes","No"],key="phone_service")
+            st.selectbox("Do you have a multiple lines?",options=["Yes","No"],key="multiple_lines")
+            st.selectbox("What is prefered internet service?",options= ["Fiber optic", "No", "DSL"],key="internet_service")
+            st.selectbox("Are you a subscriber to the online security service?",options=["Yes","No"],key="online_security")
+            st.selectbox("Are you a subscriber to the online backup service?",options=["Yes","No"],key="online_backup")
+            st.selectbox("Are you a subscriber to the device protection service?",options=["Yes","No"],key="device_protection")
+            st.selectbox("Are you a subscriber to the tech support service?",options=["Yes","No"],key="tech_support")
+            st.selectbox("Are you a subscriber to the streaming TV service?",options=["Yes","No"],key="streaming_tv")
+            st.selectbox("Are you a subscriber to the streaming movies service?",options=["Yes","No"],key="streaming_movies")
+            st.selectbox("Are you a subscriber to the Paperless Billing Service?",options=["Yes","No"],key="paperless_billing")
+        st.form_submit_button("Make Prediction",on_click=make_prediction,kwargs=dict(pipeline=pipeline,encoder=encoder))
+    
 
 if __name__ == "__main__":
     
     # call the display_forms function
-    display_form()
+    display_forms()
+
     final_prediction = st.session_state["prediction"]
     if not final_prediction:
         st.write("## Prediction shows here")
