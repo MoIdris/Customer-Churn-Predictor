@@ -2,8 +2,11 @@
 import streamlit as st
 import requests
 import json
-#from streamlit_lottie import st_lottie
 from streamlit_option_menu import option_menu
+import streamlit_authenticator as stauth
+import yaml
+from yaml.loader import SafeLoader
+
 
 # Set page configuration
 st.set_page_config(
@@ -13,23 +16,52 @@ st.set_page_config(
     initial_sidebar_state='expanded'
 )
 
-# # Define function to get animation
-# def lottie_url(url: str):
-#     r = requests.get(url)
-#     if r.status_code != 200:
-#         return None
-#     return r.json()
 
-#lottie_img = lottie_url("https://lottie.host/80d6a368-c787-af59-Beca-9t64cf41btb/VdfzfJexsp.jscn")
+with open('./Utils/config.yaml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
+
+authenticator = stauth.Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days'],
+    config['preauthorized']
+)
+
+name, authentication_status, username = authenticator.login(location='sidebar')
+
+
+
+if st.session_state['authentication_status']:
+    authenticator.logout(location='sidebar')
+    st.title('Customer Churn Predictor')
+
+if st.session_state['authentication_status']:
+    st.title('Customer Churn Predictor')
+elif st.session_state['authentication_status'] is False:
+    st.error('Wrong username/password')
+elif st.session_state['authentication_status'] is None:
+    st.info("Login to get access to the app")
+    st.code("""
+    Test Account
+    Username: analystidris
+    Password: 456123
+    """)
+
+if st.session_state['authentication_status']:
+    st.title = "Customer Churn Predictor"
+    authenticator.logout(location='sidebar')
 
 selected = option_menu(None, options=["Home", "About Us", "Upload"], 
     icons=['house','gear' 'cloud-upload'], 
     menu_icon="cast", default_index=0, orientation="horizontal")
 selected
 
+
+
 # Intro on title
 if selected == "Home":
-    st.title("Customer Churn Predictor")
+    st.title('Customer Churn Predictor')
     st.write("""Revealing the Factors Behind Customer Churn !!""")
     st.write("##")
 
