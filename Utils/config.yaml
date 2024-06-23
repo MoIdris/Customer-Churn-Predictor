@@ -1,7 +1,8 @@
 credentials:
   usernames:
-    valiant:
+    analystidris:
       email: idmoh44@yahoo.com
+      logged_in: False
       name: Mohammed Idris
       password: '456123'  # This should be a hashed password
 cookie:
@@ -9,5 +10,7 @@ cookie:
   key: cookie_signature_key
   name: cookie_name
 preauthorized:
-  usernames:
-  - beela
+  emails:
+  - mohammed.idris@azubiafrica.org
+usernames:
+  
