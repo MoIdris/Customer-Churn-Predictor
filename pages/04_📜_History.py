@@ -1,35 +1,3 @@
-import os
-import streamlit as st
-import pandas as pd
-
-st.set_page_config(
-    page_title ='History Page',
-    page_icon ='📜',
-    layout="wide"
-)
-
-
-
-def display_history_page():
-    # get the path of the history data
-    csv_path = "./data/prediction_history.csv"
-    csv_exists = os.path.exists(csv_path)
-
-    if csv_exists:
-        history_data= pd.read_csv(csv_path)
-        st.dataframe(history_data)
-    else:
-        st.write("No history data found")
-        st.write("Please run the app and make a prediction to view the history page")
-        st.stop()
-
-
-
-
-
-
-# st.dataframe(history_df)
-
-if __name__ == "__main__":
-    st.title("History Page 📜")
-    display_history_page()
+version https://git-lfs.github.com/spec/v1
+oid sha256:0e3005ffcb67a163dba927aa420a2849639d8befa43cd6a6f4e51449c09fee00
+size 718
