@@ -102,7 +102,7 @@ selected
 # Intro on title
 if selected == "Home":
     #st.title('Customer Churn Predictor')
-    st.write("""Revealing the Factors Behind Customer Churn !!""")
+    st.write("""Revealing the Factors Behind Customer Churn """)
     st.write("##")
 
     col1, col2 = st.columns(2)
@@ -117,6 +117,50 @@ if selected == "Home":
                 - Take proactive measures to retain their valuable customers.
                 - Better calculate the lifetime value of your customers.
         """)
+
+        col1,col2 = st.columns(2)
+        with col1:
+            st.header("Key Features")
+            st.write("""
+                        - View Data - Allows you to view data 
+                        - Predict - Feature that allows to make single prediction or predict your csv data in bulk
+                        - View History - Allows you to view the history of your predictions
+                        - Dashboard - View data visualizations
+                        """)
+            
+        with col2:
+            st.header("User Benefits")
+            st.write("""
+                        - Make data driven decisions effortlessly
+                        - User-Friendly Interface
+                        - Real-Time predictions
+                        - Insightful dashboards
+                        - Ease to use
+                        """)
+            
+        col1,col2 = st.columns(2)
+        with col1:
+            st.header("Machine Learning Integration")
+            st.write("""
+                    - You have access three trained machine learning models
+                    - Simple integration and user-friendly access
+                    - Save data to local database or locally for future use
+                    - Get probability of predictions
+                    """)
+        with col2:
+            st.header("How To Run Applicattion")
+            code = '''
+            #Activate Virtual Environment
+            source venv/bin/activate
+
+            #Install dependencies
+            pip install -r requirements.txt
+
+            #Run the application
+            streamlit run app.py
+            '''
+            st.code(code,language="python")
+            
 
     # with col2:
     #     st_lottie(
@@ -154,6 +198,8 @@ if selected == "About Us":
 #     width=600
 
 # )
+
+    
 
 if selected == "Upload":
         #st.title("Explore")
