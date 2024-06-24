@@ -120,17 +120,37 @@
 import streamlit as st
 import pandas as pd
 import os
+import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
-import streamlit_authenticator as stauth
 
 
 # Set page configuration
 st.set_page_config(page_title="History", page_icon="📜",  layout="wide")
 
+# with open('./Utils/config.yaml') as file:
+#     config = yaml.load(file, Loader=SafeLoader)
+
+# authenticator = stauth.Authenticate(
+#     config['credentials'],
+#     config['cookie']['name'],
+#     config['cookie']['key'],
+#     config['cookie']['expiry_days'],
+#     config['preauthorized']
+# )
+
+# name, authentication_status,username = authenticator.login(location='sidebar')
+
+
+# if st.session_state['authentication_status']:
+#     authenticator.logout(location='sidebar')
+
+#### User Authentication
+# load the config.yaml file 
 with open('./Utils/config.yaml') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
+# Create an authentication object
 authenticator = stauth.Authenticate(
     config['credentials'],
     config['cookie']['name'],
@@ -139,14 +159,34 @@ authenticator = stauth.Authenticate(
     config['preauthorized']
 )
 
-name, authentication_status,username = authenticator.login(location='sidebar')
+# invoke the login authentication
+name, authentication_status, username = authenticator.login(location="sidebar")
 
+if st.session_state["authentication_status"] is None:
+    st.warning("Please Log in to get access to the application")
+    test_code = '''
+    Test Account
+    username: analystidris
+    password: 456123
+    '''
+    st.code(test_code)
+        
+elif st.session_state["authentication_status"] == False:
+    st.error("Wrong username or password")
+    st.info("Please Try Again")
+    test_code = '''
+    Test Account
+    username: analystidris
+    password: 456123
+    '''
+    st.code(test_code)
+else:
+    st.info("Login Successful")
+    st.write(f'Welcome *{username}*')
+    # logout user using streamlit authentication logout
+    authenticator.logout('Logout', 'sidebar')
 
-if st.session_state['authentication_status']:
-    authenticator.logout(location='sidebar')
-
-
-    def display_history_prediction():
+def display_history_prediction():
 
         csv_path = "./Data/history.csv"
         csv_exists = os.path.exists(csv_path)
@@ -156,20 +196,20 @@ if st.session_state['authentication_status']:
             st.dataframe(history)
 
 
-    if __name__ == '__main__':
+if __name__ == '__main__':
 
-        st.title('History Page')
+        #st.title('History Page')
         display_history_prediction()
         
 
-elif st.session_state['authentication_status'] is False:
-    st.error('Wrong username/password')
-elif st.session_state['authentication_status'] is None:
-    st.info('Login to get access to the app')
-    st.code("""
-    Test Account
-    Username: beela
-    Password: 456123
-    """)
+# elif st.session_state['authentication_status'] is False:
+#     st.error('Wrong username/password')
+# elif st.session_state['authentication_status'] is None:
+#     st.info('Login to get access to the app')
+#     st.code("""
+#     Test Account
+#     Username: beela
+#     Password: 456123
+#     """)
 
 # # st.write(st.session_state)

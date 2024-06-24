@@ -20,6 +20,7 @@ st.set_page_config(
 with open('./Utils/config.yaml') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
+# Create an authentication object
 authenticator = stauth.Authenticate(
     config['credentials'],
     config['cookie']['name'],
@@ -28,29 +29,68 @@ authenticator = stauth.Authenticate(
     config['preauthorized']
 )
 
-name, authentication_status, username = authenticator.login(location='sidebar')
+# invoke the login authentication
+name, authentication_status, username = authenticator.login(location="sidebar")
 
-
-
-if st.session_state['authentication_status']:
-    authenticator.logout(location='sidebar')
-    st.title('Customer Churn Predictor')
-
-if st.session_state['authentication_status']:
-    st.title('Customer Churn Predictor')
-elif st.session_state['authentication_status'] is False:
-    st.error('Wrong username/password')
-elif st.session_state['authentication_status'] is None:
-    st.info("Login to get access to the app")
-    st.code("""
+if st.session_state["authentication_status"] is None:
+    st.warning("Please Log in to get access to the application")
+    test_code = '''
     Test Account
-    Username: analystidris
-    Password: 456123
-    """)
+    username: analystidris
+    password: 456123
+    '''
+    st.code(test_code)
+        
+elif st.session_state["authentication_status"] == False:
+    st.error("Wrong username or password")
+    st.info("Please Try Again")
+    test_code = '''
+    Test Account
+    username: analystidris
+    password: 456123
+    '''
+    st.code(test_code)
+else:
+    st.info("Login Successful")
+    st.write(f'Welcome *{username}*')
+    #logout user using streamlit authentication logout
+    authenticator.logout('Logout', 'sidebar')
 
-if st.session_state['authentication_status']:
-    st.title = "Customer Churn Predictor"
-    authenticator.logout(location='sidebar')
+
+# with open('./Utils/config.yaml') as file:
+#     config = yaml.load(file, Loader=SafeLoader)
+
+# authenticator = stauth.Authenticate(
+#     config['credentials'],
+#     config['cookie']['name'],
+#     config['cookie']['key'],
+#     config['cookie']['expiry_days'],
+#     config['preauthorized']
+# )
+
+# name, authentication_status, username = authenticator.login(location='sidebar')
+
+
+
+# if st.session_state['authentication_status']:
+#     authenticator.logout(location='sidebar')
+#     st.title('Customer Churn Predictor')
+
+# if st.session_state['authentication_status']:
+#     st.title('Customer Churn Predictor')
+# elif st.session_state['authentication_status'] is False:
+#     st.error('Wrong username/password')
+# elif st.session_state['authentication_status'] is None:
+#     st.info("Login to get access to the app")
+#     st.code("""
+#     Test Account
+#     Username: analystidris
+#     Password: 456123
+#     """)
+
+# if st.session_state['authentication_status']:
+#     st.title = "Customer Churn Predictor"
+#     authenticator.logout(location='sidebar')
 
 selected = option_menu(None, options=["Home", "About Us", "Upload"], 
     icons=['house','gear' 'cloud-upload'], 
@@ -61,7 +101,7 @@ selected
 
 # Intro on title
 if selected == "Home":
-    st.title('Customer Churn Predictor')
+    #st.title('Customer Churn Predictor')
     st.write("""Revealing the Factors Behind Customer Churn !!""")
     st.write("##")
 
@@ -94,7 +134,7 @@ if selected == "Home":
 if selected == "About Us":
     col3, col4 = st.columns(2)
     with col3:
-        st.title("About us")
+        #st.title("About us")
         st.write("##")
         st.write("""
                  Our team of experts operates with the following objectives:
@@ -116,7 +156,7 @@ if selected == "About Us":
 # )
 
 if selected == "Upload":
-        st.title("Explore")
+        #st.title("Explore")
         st.write("##")
         st.markdown("""
                     ### Our robust machine learning algorithms enable you to forecast customer churn with your dataset""")
