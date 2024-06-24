@@ -3,13 +3,58 @@ import streamlit as st
 import pandas as pd
 import joblib
 import datetime
+import streamlit_authenticator as stauth
+import yaml
+from yaml.loader import SafeLoader
 
 st.set_page_config(
     page_title ='Bulk Predict Page',
     page_icon ='🔮',
     layout="wide"
 )
-st.title("Bulk Prediction Page 🔮!")
+
+#### User Authentication
+# load the config.yaml file 
+with open('./Utils/config.yaml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
+
+# Create an authentication object
+authenticator = stauth.Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days'],
+    config['preauthorized']
+)
+
+# invoke the login authentication
+name, authentication_status, username = authenticator.login(location="sidebar")
+
+if st.session_state["authentication_status"] is None:
+    st.warning("Please Log in to get access to the application")
+    test_code = '''
+    Test Account
+    username: analystidris
+    password: 456123
+    '''
+    st.code(test_code)
+        
+elif st.session_state["authentication_status"] == False:
+    st.error("Wrong username or password")
+    st.info("Please Try Again")
+    test_code = '''
+    Test Account
+    username: analystidris
+    password: 456123
+    '''
+    st.code(test_code)
+else:
+    st.info("Login Successful")
+    st.write(f'Welcome *{username}*')
+    # logout user using streamlit authentication logout
+    authenticator.logout('Logout', 'sidebar')
+
+#st.title("Bulk Prediction Page 🔮!")
 
 # load the machine learning model components
 @st.cache_resource

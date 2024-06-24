@@ -1,9 +1,12 @@
 # Import necessary libraries
 import streamlit as st
 import pyodbc
-import pandas as pd 
+import pandas as pd
 import time
 from Utils.more_info import markdown_table1, markdown_table2
+import streamlit_authenticator as stauth
+import yaml
+from yaml.loader import SafeLoader
 
 # Set page configuration
 st.set_page_config(
@@ -13,131 +16,159 @@ st.set_page_config(
     initial_sidebar_state='expanded'
 )
 
-# Set page title
-st.title("Customer Churn Predictor Database ")
+# # Set page title
+# st.title("Customer Churn Predictor Database ")
 
-# Function to initialize database connection
-@st.cache_resource(show_spinner="Connecting to database, please wait...")
-def init_connection():
-    """Establishes a connection to the SQL Server database."""
-    return pyodbc.connect(
-        f"DRIVER={{SQL Server}};SERVER={st.secrets['server']};DATABASE={st.secrets['database']};UID={st.secrets['username']};PWD={st.secrets['password']}"
-    )
+# st.set_page_config(
+#     page_title ='Data Page',
+#     page_icon ='📊',
+#     layout="wide"
+# )
 
-# Initialize database connection
-connection = init_connection()  
+# # Import necessary libraries
+# import streamlit as st
+# import pyodbc
+# import pandas as pd 
+# import time
+# from Utils.more_info import markdown_table1, markdown_table2
 
-# Function to execute SQL query
-@st.cache_data(show_spinner="running_query...")
-def running_query(query):
-    """Executes a SQL query and returns the result as a DataFrame."""
-    with connection.cursor() as cursor:
-        cursor.execute(query)
-        rows = cursor.fetchall()
-        df = pd.DataFrame.from_records(rows, columns=[column[0] for column in cursor.description])
-    return df
-
-def get_all_column():
-    """Fetches all columns from the LP2_Telco_churn_first_3000 table."""
-    sql_query = " SELECT * FROM LP2_Telco_churn_first_3000 "
-    df = running_query(sql_query)
-    return df
-
-def load_and_concat_datasets(first_dataset_func, second_dataset_path):
-    """
-    Load the first dataset using a provided function and the second dataset from a CSV file,
-    then concatenate them into a single DataFrame.
-    
-    Parameters:
-    - first_dataset_func: function that returns a DataFrame for the first dataset.
-    - second_dataset_path: string path to the second dataset CSV file.
-    
-    Returns:
-    - A concatenated DataFrame containing both datasets.
-    """
-    # Load the first dataset using the provided function
-    first_train = first_dataset_func()
-    
-    # Load the second dataset from the provided CSV file path
-    second_train = pd.read_csv(second_dataset_path)
-    
-    # Concatenate the two DataFrames
-    train_df = pd.concat([first_train, second_train], ignore_index=True)
-    
-    return train_df
-
-train_df = load_and_concat_datasets(get_all_column, "./Data/LP2_Telco-churn-second-2000.csv")
+# # Set page configuration
+# st.set_page_config(
+#     page_title='Customer Churn Predictor Database',
+#     page_icon='📊',
+#     layout='wide',
+#     initial_sidebar_state='expanded'
+# )
 
 
-# Define a dictionary for mapping boolean and None values to more meaningful categories
-new_cat_values_mapping = {
-    'multiple_lines': {True: 'Yes', False: 'No', None: 'No phone service'},
-    'online_security': {True: 'Yes', False: 'No', None: 'No internet service'},
-    'online_backup': {True: 'Yes', False: 'No', None: 'No internet service'},
-    'device_protection': {True: 'Yes', False: 'No', None: 'No internet service'},
-    'tech_support': {True: 'Yes', False: 'No', None: 'No internet service'},
-    'streaming_tv': {True: 'Yes', False: 'No', None: 'No internet service'},
-    'streaming_movies': {True: 'Yes', False: 'No', None: 'No internet service'},
-    'churn': {True: 'Yes', False: 'No', None: 'No'},
-    'partner': {True: 'Yes', False: 'No'},
-    'dependents': {True: 'Yes', False: 'No'},
-    'paperless_billing': {True: 'Yes', False: 'No'},
-    'phone_service': {True: 'Yes', False: 'No'},
-}
+#### User Authentication
+# load the config.yaml file 
+with open('./Utils/config.yaml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
 
-# Replace old categories with the new ones
-train_df.replace(new_cat_values_mapping, inplace=True)
+# Create an authentication object
+authenticator = stauth.Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days'],
+    config['preauthorized']
+)
 
-#create a progress bar to let user know data is loading
-progress_bar = st.progress(0)
-for perc_completed in range(100):
-    time.sleep(0.03)
-    progress_bar.progress(perc_completed+1)
+# invoke the login authentication
+name, authentication_status, username = authenticator.login(location="sidebar")
 
-st.success("Data loaded successfully!")
+if st.session_state["authentication_status"] is None:
+    st.warning("Please Log in to get access to the application")
+    test_code = '''
+    Test Account
+    username: analystidris
+    password: 456123
+    '''
+    st.code(test_code)
+        
+elif st.session_state["authentication_status"] == False:
+    st.error("Wrong username or password")
+    st.info("Please Try Again")
+    test_code = '''
+    Test Account
+    username: analystidris
+    password: 456123
+    '''
+    st.code(test_code)
+else:
+    st.info("Login Successful")
+    st.write(f'Welcome *{username}*')
+    # logout user using streamlit authentication logout
+    authenticator.logout('Logout', 'sidebar')
 
-#grouping all numeric columns
-numerics = train_df.select_dtypes("number").columns
-#grouping all categorical columns
-categoricals = train_df.select_dtypes("object").columns
+    #st.title("Customer Churn Database 📊")
 
-col1,col2 = st.columns(2)
-with col1:
-    option = st.selectbox(
-        "How would you like to view data?",
-        ("All columns", "Numerical columns", "Categorical columns"),
-        index=None,
-        placeholder="Select contact method...",)
-# Conditionally display data based on the selected option
-if option == "All data":
-    st.write("### All Data")
-    st.dataframe(train_df)
-    if st.button("Click here to get more information about data dictionary"):
-        col3,col4 = st.columns(2)
-        with col3:
-        # Display the markdown table inside the expander
+    def show_dataframe():
+        # read csv
+        df = pd.read_csv("./Data/Customer_churn.csv")
+        # File uploader widget from local directory
+        uploaded_file = st.file_uploader("Upload your data", type="csv")
+        if uploaded_file is not None:
+            df =pd.read_csv(uploaded_file)
+        else:
+            # load second training data
+            df = df.copy()
+        return df
+    # load dataframe
+    df = show_dataframe()
+
+    def values_mapper(df,columns):
+        """ This function takes two parameters and map the values in the column
+        df: dataframe object
+        columns_columns: columnsin in the dataframe that you want to map the values
+        returns dataframe
+        """
+        for col in columns:
+            cat_mapping = {True:"Yes",False:"No","No internet service":"No","No phone service":"No"}
+            df[col] = df[col].replace(cat_mapping)
+        return df
+
+    # Create a progress bar to let user know data is loading
+    progress_bar = st.progress(0)
+    for percentage_completed in range(100):
+        time.sleep(0.05)
+        progress_bar.progress(percentage_completed+1)
+
+    st.success("Data loaded successfully!")
+
+    # Initialize the session state for categories
+    if "category" not in st.session_state:
+        st.session_state["category"] = "All Columns"
+
+
+    col1,col2 = st.columns(2)
+    with col2:
+        category = st.selectbox("Choose Category",options=["All Columns","Numerical Columns", "Categorical Columns"],key="category")
+    # Filtering Datatypes
+    def filter_columns(category):
+        if category == "Numerical Columns":
+            filtered_df = df.select_dtypes(include="number")
+        elif category == "Categorical Columns":
+            filtered_df = df.select_dtypes(exclude="number")
+        else:
+            filtered_df = df
+        return filtered_df
+
+
+    # show info button
+    show_info = st.button("Click here to view information about data",key="show_info")
+        
+    # Filter markdowns based on the selected columns category
+    if show_info:
+        if st.session_state["category"] == "Numerical Columns":
+            st.write("Numerical Columns")
             st.markdown(markdown_table1)
-        with col4:
+        elif st.session_state["category"] == "Categorical Columns":
+            st.write("Categorical Columns")
             st.markdown(markdown_table2)
-elif option == "Numerical columns":
-    st.write("### Numerical Columns")
-    st.dataframe(train_df[numerics])
-    if st.button("Click here to get more information about data dictionary"):
-        # Display the markdown table inside the expander
-        col3,col4 = st.columns(2)
-        with col3:
-        # Display the markdown table inside the expander
-            st.markdown(markdown_table1)
-        with col4:
-            st.markdown(markdown_table2)
-elif option == "Categorical columns":
-    st.write("### Categorical Columns")
-    st.dataframe(train_df[categoricals])
-    if st.button("Click here to get more information about data dictionary"):
-        # Display the markdown table inside the expander
-        col3,col4 = st.columns(2)
-        with col3:
-        # Display the markdown table inside the expander
-            st.markdown(markdown_table1)
-        with col4:
-            st.markdown(markdown_table2)
+        else:
+            col1,col2 = st.columns(2)
+            with col1:
+                st.write("Numerical Columns")
+                st.markdown(markdown_table1)
+            with col2:
+                st.write("Categorical Columns")
+                st.markdown(markdown_table2)
+    else:
+        st.write("#")
+        filtered_columns = filter_columns(st.session_state.category)
+
+        # display the filtered dataframe
+        st.write(filtered_columns)
+
+
+    if __name__ == "__main__":
+        # call the values_mapper function
+        columns_to_map = ["PaperlessBilling","Partner","Dependents","PhoneService","Churn","StreamingMovies","StreamingTV","MultipleLines","OnlineSecurity","OnlineBackup","DeviceProtection","TechSupport"]
+        final_df = values_mapper(df,columns=columns_to_map)
+       
+        
+
+        
+    
