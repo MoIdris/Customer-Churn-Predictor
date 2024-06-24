@@ -1,2 +1,2 @@
 ,gender,seniorcitizen,partner,tenure,monthlycharges,totalcharges,paymentmethod,contract,paperlessbilling,dependents,phoneservice,multiplelines,streamingtv,streamingmovies,onlinesecurity,onlinebackup,deviceprotection,techsupport,internetservice
-0,Male,1,Yes,0,0.0,0.0,Electronic check,One year,No,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Fiber optic
+0,Male,1,Yes,0,0.0,8000.0,Electronic check,Month-to-month,Yes,Yes,Yes,Yes,Yes,No,Yes,Yes,Yes,Yes,Fiber optic

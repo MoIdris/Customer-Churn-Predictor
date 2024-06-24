@@ -3,6 +3,9 @@ import streamlit as st
 import plotly.express as px
 import pandas as pd
 import altair as alt
+import streamlit_authenticator as stauth
+import yaml
+from yaml.loader import SafeLoader
 
 # Page configurations
 st.set_page_config(
@@ -11,11 +14,54 @@ st.set_page_config(
     layout="wide"
 )
 
+
+#### User Authentication
+# load the config.yaml file 
+with open('./Utils/config.yaml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
+
+# Create an authentication object
+authenticator = stauth.Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days'],
+    config['preauthorized']
+)
+
+# invoke the login authentication
+name, authentication_status, username = authenticator.login(location="sidebar")
+
+if st.session_state["authentication_status"] is None:
+    st.warning("Please Log in to get access to the application")
+    test_code = '''
+    Test Account
+    username: analystidris
+    password: 456123
+    '''
+    st.code(test_code)
+        
+elif st.session_state["authentication_status"] == False:
+    st.error("Wrong username or password")
+    st.info("Please Try Again")
+    test_code = '''
+    Test Account
+    username: analystidris
+    password: 456123
+    '''
+    st.code(test_code)
+else:
+    st.info("Login Successful")
+    st.write(f'Welcome *{username}*')
+    # logout user using streamlit authentication logout
+    authenticator.logout('Logout', 'sidebar')
+
+
 # set page theme
 alt.themes.enable("dark")
 color_map = {"Yes":"blue","No":"skyblue"}
 # read data for dashboard
-df = pd.read_csv('./Data\Customer_churn_Deployment_data.csv')
+df = pd.read_csv('./Data/Customer_churn_Deployment_data.csv')
 
 # Create a function to view the EDA
 def eda_dashboard():
@@ -146,7 +192,7 @@ def kpi_dashboard():
 
 if __name__ == "__main__":
     # set page title
-    st.title("Dashboard Page📈")
+    #st.title("Dashboard Page📈")
 
     col1,col2 = st.columns(2)
     with col1:
