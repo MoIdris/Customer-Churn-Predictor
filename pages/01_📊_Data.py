@@ -1,6 +1,7 @@
 # Import necessary libraries
 import streamlit as st
 import pyodbc
+import os
 import pandas as pd
 import time
 from Utils.more_info import markdown_table1, markdown_table2
@@ -13,36 +14,10 @@ st.set_page_config(
     page_title='Customer Churn Predictor Database',
     page_icon='📊',
     layout='wide',
-    initial_sidebar_state='expanded'
 )
 
-# # Set page title
-# st.title("Customer Churn Predictor Database ")
-
-# st.set_page_config(
-#     page_title ='Data Page',
-#     page_icon ='📊',
-#     layout="wide"
-# )
-
-# # Import necessary libraries
-# import streamlit as st
-# import pyodbc
-# import pandas as pd 
-# import time
-# from Utils.more_info import markdown_table1, markdown_table2
-
-# # Set page configuration
-# st.set_page_config(
-#     page_title='Customer Churn Predictor Database',
-#     page_icon='📊',
-#     layout='wide',
-#     initial_sidebar_state='expanded'
-# )
-
-
 #### User Authentication
-# load the config.yaml file 
+# Load the config.yaml file 
 with open('./Utils/config.yaml') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
@@ -59,7 +34,7 @@ authenticator = stauth.Authenticate(
 name, authentication_status, username = authenticator.login(location="sidebar")
 
 if st.session_state["authentication_status"] is None:
-    st.warning("Please Log in to get access to the application")
+    st.warning("Please Log in to get access to the App")
     test_code = '''
     Test Account
     username: analystidris
@@ -77,16 +52,16 @@ elif st.session_state["authentication_status"] == False:
     '''
     st.code(test_code)
 else:
-    st.info("Login Successful")
+    #st.info("Login Successful")
     st.write(f'Welcome *{username}*')
     # logout user using streamlit authentication logout
     authenticator.logout('Logout', 'sidebar')
 
-    #st.title("Customer Churn Database 📊")
+    st.title("Customer Churn Predictor Database")
 
     def show_dataframe():
         # read csv
-        df = pd.read_csv("./Data/Customer_churn.csv")
+        df = pd.read_csv("./Data/Customer_churn_Deployment_data.csv")
         # File uploader widget from local directory
         uploaded_file = st.file_uploader("Upload your data", type="csv")
         if uploaded_file is not None:
@@ -165,10 +140,6 @@ else:
 
     if __name__ == "__main__":
         # call the values_mapper function
-        columns_to_map = ["PaperlessBilling","Partner","Dependents","PhoneService","Churn","StreamingMovies","StreamingTV","MultipleLines","OnlineSecurity","OnlineBackup","DeviceProtection","TechSupport"]
+        columns_to_map = ['partner','dependents','phoneservice','multiplelines','internetservice','onlinesecurity','onlinebackup','deviceprotection','techsupport','streamingtv','streamingmovies','contract','paperlessbilling','paymentmethod']
         final_df = values_mapper(df,columns=columns_to_map)
        
-        
-
-        
-    

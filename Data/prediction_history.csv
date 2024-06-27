@@ -7,3 +7,13 @@ Male,1,Yes,0,0.0,0.0,Electronic check,Month-to-month,Yes,Yes,Yes,Yes,Yes,Yes,Yes
 Male,1,Yes,0,0.0,0.0,Electronic check,Month-to-month,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Fiber optic,2024-06-23,Logistic Regression,Yes,0.9321213256443712
 Male,1,Yes,0,0.0,0.0,Electronic check,One year,No,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Fiber optic,2024-06-23,Logistic Regression,Yes,0.8071265304853328
 Male,1,Yes,0,0.0,8000.0,Electronic check,Month-to-month,Yes,Yes,Yes,Yes,Yes,No,Yes,Yes,Yes,Yes,Fiber optic,2024-06-24,Logistic Regression,Yes,0.9968899387137121
+Male,1,Yes,0,0.0,0.0,Electronic check,Month-to-month,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Fiber optic,2024-06-26,Logistic Regression,Yes,0.9321213256443712
+Male,1,Yes,0,0.0,0.0,Electronic check,Month-to-month,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Fiber optic,2024-06-26,AdaBoost,Yes,0.5074762499199338
+Male,1,Yes,0,0.0,0.0,Electronic check,Month-to-month,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Fiber optic,2024-06-26,Logistic Regression,Yes,0.9321213256443712
+Male,1,Yes,0,0.0,0.0,Electronic check,Month-to-month,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Fiber optic,2024-06-26,Logistic Regression,Yes,0.9321213256443712
+Male,1,Yes,0,0.0,0.0,Electronic check,Two year,Yes,Yes,Yes,Yes,Yes,No,Yes,Yes,Yes,Yes,Fiber optic,2024-06-26,Logistic Regression,Yes,0.6335782628413659
+Male,1,Yes,0,0.0,0.0,Mailed check,Two year,No,Yes,Yes,Yes,Yes,No,Yes,Yes,Yes,No,Fiber optic,2024-06-26,Logistic Regression,Yes,0.5150530651656965
+Male,1,Yes,0,0.0,0.0,Mailed check,Two year,No,Yes,Yes,Yes,No,No,No,No,Yes,No,Fiber optic,2024-06-26,Logistic Regression,Yes,0.603015717712624
+Male,1,Yes,0,0.0,0.0,Mailed check,Two year,No,Yes,Yes,Yes,No,No,No,No,Yes,No,No,2024-06-26,Logistic Regression,No,0.8484947673076249
+Male,1,Yes,0,0.0,0.0,Electronic check,Month-to-month,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Fiber optic,2024-06-26,Logistic Regression,Yes,0.9321213256443712
+Male,1,Yes,0,0.0,0.0,Electronic check,Two year,No,No,Yes,Yes,No,No,Yes,Yes,Yes,Yes,No,2024-06-26,Logistic Regression,No,0.8817708432551542

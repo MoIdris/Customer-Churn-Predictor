@@ -216,7 +216,7 @@ if st.session_state['authentication_status']:
 elif st.session_state['authentication_status'] is False:
     st.error('Wrong username/password')
 elif st.session_state['authentication_status'] is None:
-    st.info('Login to get access to the app')
+    st.info('Please Log in to get access to the App')
     st.code("""
     Test Account
     Username: analystidris

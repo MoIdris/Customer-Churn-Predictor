@@ -163,7 +163,7 @@ authenticator = stauth.Authenticate(
 name, authentication_status, username = authenticator.login(location="sidebar")
 
 if st.session_state["authentication_status"] is None:
-    st.warning("Please Log in to get access to the application")
+    st.warning("Please Log in to get access to the App")
     test_code = '''
     Test Account
     username: analystidris
@@ -181,26 +181,28 @@ elif st.session_state["authentication_status"] == False:
     '''
     st.code(test_code)
 else:
-    st.info("Login Successful")
+    #st.info("Login Successful")
     st.write(f'Welcome *{username}*')
     # logout user using streamlit authentication logout
     authenticator.logout('Logout', 'sidebar')
 
-def display_history_prediction():
+    st.title("History")
 
-        csv_path = "./Data/history.csv"
-        csv_exists = os.path.exists(csv_path)
+    def display_history_prediction():
 
-        if csv_exists:
-            history = pd.read_csv(csv_path)
-            st.dataframe(history)
+            csv_path = "./Data/history.csv"
+            csv_exists = os.path.exists(csv_path)
+
+            if csv_exists:
+                history = pd.read_csv(csv_path)
+                st.dataframe(history)
 
 
-if __name__ == '__main__':
+    if __name__ == '__main__':
 
-        #st.title('History Page')
-        display_history_prediction()
-        
+            #st.title('History Page')
+            display_history_prediction()
+            
 
 # elif st.session_state['authentication_status'] is False:
 #     st.error('Wrong username/password')
