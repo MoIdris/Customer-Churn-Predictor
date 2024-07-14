@@ -119,7 +119,7 @@ else:
         df = pd.DataFrame(data=data,columns=columns)
 
         # Save dataframe to CSV as historics data
-        df.to_csv('./data/history.csv')
+        df.to_csv('./Data/history.csv')
 
         # make predictions
         pred = pipeline.predict(df)
@@ -146,7 +146,7 @@ else:
         df["Prediction"] = st.session_state["prediction"]
         df["PredictionProbability"] = st.session_state["probability"]
         # export df as prediction_history.csv
-        df.to_csv('./data/prediction_history.csv',mode="a", header=not os.path.exists('./data/prediction_history.csv'),index=False)
+        df.to_csv('./Data/prediction_history.csv',mode="a", header=not os.path.exists('./Data/prediction_history.csv'),index=False)
         return prediction,prediction_label,probability
 
     # create an initial instance of session state to hold prediction
